@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>書籍條碼工作站 Pro</title>
+    <style>
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; width: 100%; max-width: 500px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); box-sizing: border-box; }
+        h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; }
+        input { width: 100%; padding: 15px; font-size: 20px; text-align: center; border: 2px solid #ddd; border-radius: 8px; margin: 15px 0; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: #3498db; outline: none; background: #fffde7; box-shadow: 0 0 8px rgba(52,152,219,0.3); }
+        #status { font-weight: bold; padding: 12px; border-radius: 6px; margin-bottom: 15px; min-height: 24px; transition: 0.3s; }
+        .valid { background: #d4edda; color: #155724; }
+        .invalid { background: #f8d7da; color: #721c24; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; font-size: 14px; }
+        .btn-download { background: #2980b9; }
+        .btn-clear { background: #95a5a6; }
+        button:active { opacity: 0.8; }
+        #stats { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+        #log { width: 100%; max-width: 500px; background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-height: 300px; overflow-y: auto; box-sizing: border-box; }
+        .log-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-family: monospace; }
+        .log-item:first-child { background: #f8f9fa; font-weight: bold; border-left: 4px solid var(--success); }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📚 書籍條碼掃描站</h2>
+    <div id="stats">已儲存數量：<span id="count">0</span></div>
+    
+    <input type="text" id="barcodeInput" placeholder="請掃描條碼..." autofocus>
+    <div id="status">準備就緒</div>
+
+    <div class="btn-group">
+        <button class="btn-download" onclick="exportCSV()">💾 下載 CSV</button>
+        <button class="btn-clear" onclick="clearData()">🗑️ 清空資料</button>
+    </div>
+</div>
+
+<h4 style="margin: 20px 0 10px 0; color: #7f8c8d;">近期掃描紀錄</h4>
+<div id="log"></div>
+
+<script>
+    const input = document.getElementById('barcodeInput');
+    const status = document.getElementById('status');
+    const logContainer = document.getElementById('log');
+    const countEl = document.getElementById('count');
+
+    // 從 localStorage 讀取舊資料
+    let savedData = JSON.parse(localStorage.getItem('book_barcodes')) || [];
+
+    // 初始化顯示
+    renderLog();
+
+    // 點擊頁面任何地方都強制對焦到輸入框
+    document.addEventListener('click', () => input.focus());
+
+    // 處理掃描槍輸入
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const val = input.value.trim().toUpperCase();
+            if (val) {
+                validateBarcode(val);
+                input.value = '';
+            }
+        }
+    });
+
+    function validateBarcode(code) {
+        // 格式檢核：2個英文字母 + 7個數字
+        const regex = /^[A-Z]{2}\d{7}$/;
+        
+        if (regex.test(code)) {
+            // 檢查是否重複掃描
+            if (savedData.some(item => item.barcode === code)) {
+                showStatus("⚠️ 此條碼已掃描過", "invalid");
+                playAlertSound('error');
+                return;
+            }
+
+            // 儲存資料
+            const newEntry = {
+                barcode: code,
+                time: new Date().toLocaleString()
+            };
+            savedData.unshift(newEntry);
+            localStorage.setItem('book_barcodes', JSON.stringify(savedData));
+            
+            showStatus("✅ 掃描成功: " + code, "valid");
+            playAlertSound('success');
+            renderLog();
+        } else {
+            showStatus("❌ 格式不符 (AA1234567)", "invalid");
+            playAlertSound('error');
+        }
+    }
+
+    function renderLog() {
+        countEl.innerText = savedData.length;
+        logContainer.innerHTML = savedData.map(item => `
+            <div class="log-item">
+                <span>${item.barcode}</span>
+                <span style="color: #999; font-size: 0.8em;">${item.time}</span>
+            </div>
+        `).join('');
+    }
+
+    function showStatus(text, className) {
+        status.innerText = text;
+        status.className = className;
+    }
+
+    // 聲音反饋
+    function playAlertSound(type) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'success') {
+            osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        } else {
+            // 格式錯誤時使用語音，這在舊平板上最明顯
+            const msg = new SpeechSynthesisUtterance("格式錯誤");
+            msg.lang = 'zh-TW';
+            window.speechSynthesis.speak(msg);
+        }
+    }
+
+    // 下載 CSV 功能
+    function exportCSV() {
+        if (savedData.length === 0) {
+            alert("目前沒有資料可匯出！");
+            return;
+        }
+        let csvContent = "\uFEFF條碼,掃描時間\n"; // \uFEFF 解決 Excel 中文亂碼
+        savedData.forEach(item => {
+            csvContent += `${item.barcode},${item.time}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `books_export_${new Date().toLocaleDateString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // 清空資料
+    function clearData() {
+        if (confirm("確定要清空所有已掃描的資料嗎？(此動作無法復原)")) {
+            savedData = [];
+            localStorage.removeItem('book_barcodes');
+            renderLog();
+            showStatus("已清空所有紀錄", "");
+        }
+    }
+</script>
+
+</body>
+</html>
