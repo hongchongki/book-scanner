@@ -94,41 +94,38 @@
     function playFeedback(type) {
     const synth = window.speechSynthesis;
     
-    // 成功掃描：清脆的高音「嗶」
+    // 1. 處理嗶聲 (音訊上下文在 Firefox 需即時建立)
     if (type === 'success') {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        
-        osc.frequency.setValueAtTime(1000, audioCtx.currentTime); // 比之前稍高，更清脆
-        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1); // 優雅淡出
         osc.start();
         osc.stop(audioCtx.currentTime + 0.1);
         return;
     }
 
-    // 重複或錯誤：語音提醒
+    // 2. 處理語音 (針對 Firefox 優化)
     let text = (type === 'duplicate') ? "重複掃描" : "格式錯誤";
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-TW';
-    utterance.rate = 1.1; // 稍微輕快的語速
+    utterance.rate = 1.2; // 稍微加快語速，聽起來更專業
+    utterance.pitch = 1.0;
 
-    // 針對 Safari 的語音卡頓修正
+    // 重要：Firefox 有時需要先取消之前的語音才能播放新的
     synth.cancel(); 
-
-    // iPhone 專屬震動回饋
-    if (navigator.vibrate) {
-        if (type === 'duplicate') {
-            navigator.vibrate([200, 100, 200]); // 兩次震動
-        } else {
-            navigator.vibrate(400); // 一次長震動
-        }
+    
+    // 震動補償
+    if (type === 'duplicate' && navigator.vibrate) {
+        navigator.vibrate([300, 100, 300]);
+    } else if (type === 'error' && navigator.vibrate) {
+        navigator.vibrate(200);
     }
 
+    // 執行播放
     synth.speak(utterance);
 }
 
