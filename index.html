@@ -3,32 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圖書館條碼工作站 </title>
+    <title>圖書館條碼工作站</title>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warn: #f39c12; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; width: 100%; max-width: 500px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); box-sizing: border-box; }
-        h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; text-align: center; }
-        input { width: 100%; padding: 15px; font-size: 20px; text-align: center; border: 2px solid #ddd; border-radius: 8px; margin: 15px 0; box-sizing: border-box; }
-        input:focus { border-color: #3498db; outline: none; background: #fffde7; }
-        #status { font-weight: bold; padding: 12px; border-radius: 6px; margin-bottom: 15px; min-height: 24px; text-align: center; }
-        .valid { background: #d4edda; color: #155724; }
-        .invalid { background: #f8d7da; color: #721c24; }
-        .duplicate { background: #fff3cd; color: #856404; border: 2px solid var(--warn); }
-        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 500px; }
-        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; }
-        .btn-download { background: #2980b9; }
-        .btn-clear { background: #95a5a6; }
-        #log { width: 100%; max-width: 500px; background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-height: 300px; overflow-y: auto; box-sizing: border-box; }
-        .log-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-family: monospace; }
+        :root {
+            --primary: #2c3e50;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warn: #f39c12;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-top: 0;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #3498db;
+            outline: none;
+            background: #fffde7;
+        }
+
+        #status {
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            min-height: 24px;
+            text-align: center;
+        }
+
+        .valid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .invalid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .duplicate {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid var(--warn);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-download {
+            background: #2980b9;
+        }
+
+        .btn-clear {
+            background: #95a5a6;
+        }
+
+        .btn-setting {
+            background: #34495e;
+        }
+
+        #log {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            max-height: 300px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-family: monospace;
+        }
+
+        .log-item span:first-child {
+            font-weight: bold;
+        }
+
+        .settings {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            display: none;
+        }
+
+        .settings h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .setting-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .setting-row label {
+            flex: 0 0 110px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .setting-row input,
+        .setting-row select {
+            margin: 0;
+            padding: 8px;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .current-format {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 420px) {
+            .setting-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .setting-row label {
+                flex: initial;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h2>📚 圖書館條碼掃描</h2>
+
     <div style="text-align:center; color:#666; font-size:0.9em; margin-bottom:10px;">
         目前已存：<span id="count" style="font-weight:bold; color:var(--primary);">0</span> 筆
+    </div>
+
+    <div class="current-format">
+        目前格式：<span id="formatDisplay" style="font-weight:bold; color:var(--primary);"></span><br>
+        提示方式：<span id="feedbackDisplay" style="font-weight:bold; color:var(--primary);"></span>
     </div>
     
     <input type="text" id="barcodeInput" placeholder="請掃描條碼..." autofocus>
@@ -37,6 +231,74 @@
     <div class="btn-group">
         <button class="btn-download" onclick="exportCSV()">💾 下載 CSV</button>
         <button class="btn-clear" onclick="clearData()">🗑️ 清空資料</button>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-setting" onclick="toggleSettings()">⚙️ 條碼格式與提示設定</button>
+    </div>
+
+    <div id="settingsPanel" class="settings">
+        <h3>條碼格式設定</h3>
+
+        <div class="setting-row">
+            <label for="formatMode">設定模式</label>
+            <select id="formatMode" onchange="onFormatModeChange()">
+                <option value="simple">簡易模式</option>
+                <option value="regex">進階 Regex</option>
+            </select>
+        </div>
+
+        <div id="simpleSettings">
+            <div class="setting-row">
+                <label for="letterCount">英文字母碼數</label>
+                <input type="number" id="letterCount" min="0" max="20" value="2">
+            </div>
+
+            <div class="setting-row">
+                <label for="digitCount">數字碼數</label>
+                <input type="number" id="digitCount" min="0" max="30" value="7">
+            </div>
+
+            <div class="hint">
+                例如：英文字母 2 碼、數字 7 碼，格式就是 <code>AB1234567</code>。<br>
+                如果是全數字 10 碼，可設定英文字母 0 碼、數字 10 碼。
+            </div>
+        </div>
+
+        <div id="regexSettings" style="display:none;">
+            <div class="setting-row">
+                <label for="customRegex">Regex</label>
+                <input type="text" id="customRegex" value="^[A-Z]{2}\\d{7}$">
+            </div>
+
+            <div class="hint">
+                進階範例：<br>
+                <code>^[A-Z]{2}\\d{7}$</code> = 2 個英文字母 + 7 個數字<br>
+                <code>^\\d{10}$</code> = 10 個數字<br>
+                <code>^[A-Z0-9]{8,12}$</code> = 8 到 12 碼英文或數字
+            </div>
+        </div>
+
+        <h3 style="margin-top:18px;">提示方式設定</h3>
+
+        <div class="setting-row">
+            <label for="feedbackMode">提示方式</label>
+            <select id="feedbackMode">
+                <option value="auto">自動判斷</option>
+                <option value="beep">只用嗶聲</option>
+                <option value="voice">優先語音</option>
+            </select>
+        </div>
+
+        <div class="hint">
+            建議使用「自動判斷」。Ubuntu Firefox 通常會自動使用嗶聲；Windows、macOS 或語音正常的環境，才會嘗試語音提示。<br>
+            成功掃描一律短嗶聲；重複與格式錯誤才會使用較明顯提示。
+        </div>
+
+        <div class="btn-group" style="margin-top:15px; margin-bottom:0;">
+            <button class="btn-download" onclick="saveAllSettings()">儲存設定</button>
+            <button class="btn-clear" onclick="resetAllSettings()">恢復預設</button>
+        </div>
     </div>
 </div>
 
@@ -48,15 +310,47 @@
     const status = document.getElementById('status');
     const logContainer = document.getElementById('log');
     const countEl = document.getElementById('count');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const formatDisplay = document.getElementById('formatDisplay');
+    const feedbackDisplay = document.getElementById('feedbackDisplay');
+
+    const formatModeEl = document.getElementById('formatMode');
+    const simpleSettingsEl = document.getElementById('simpleSettings');
+    const regexSettingsEl = document.getElementById('regexSettings');
+    const letterCountEl = document.getElementById('letterCount');
+    const digitCountEl = document.getElementById('digitCount');
+    const customRegexEl = document.getElementById('customRegex');
+    const feedbackModeEl = document.getElementById('feedbackMode');
 
     let savedData = JSON.parse(localStorage.getItem('lib_barcodes')) || [];
+
+    let barcodeSettings = JSON.parse(localStorage.getItem('lib_barcode_settings')) || {
+        mode: 'simple',
+        letterCount: 2,
+        digitCount: 7,
+        customRegex: '^[A-Z]{2}\\d{7}$'
+    };
+
+    let feedbackMode = localStorage.getItem('lib_feedback_mode') || 'auto';
+
+    loadAllSettings();
     renderLog();
 
-    document.addEventListener('click', () => input.focus());
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+            updateFeedbackDisplay();
+        };
+    }
+
+    document.addEventListener('click', () => {
+        input.focus();
+    });
 
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const val = input.value.trim().toUpperCase();
+
             if (val) {
                 validateBarcode(val);
                 input.value = '';
@@ -64,62 +358,433 @@
         }
     });
 
+    feedbackModeEl.addEventListener('change', () => {
+        feedbackMode = feedbackModeEl.value;
+        localStorage.setItem('lib_feedback_mode', feedbackMode);
+        updateFeedbackDisplay();
+        showStatus("提示方式已更新：" + getFeedbackModeLabel(feedbackMode), "");
+        input.focus();
+    });
+
     function validateBarcode(code) {
-        const regex = /^[A-Z]{2}\d{7}$/;
-        
-        // 1. 檢查格式
-        if (!regex.test(code)) {
-            showStatus("❌ 格式不符 (範例: AB1234567)", "invalid");
+        const regex = getCurrentRegex();
+
+        if (!regex) {
+            showStatus("❌ 條碼格式設定錯誤，請檢查設定", "invalid");
             playFeedback('error');
             return;
         }
 
-        // 2. 檢查重複
+        if (!regex.test(code)) {
+            showStatus("❌ 格式不符，目前格式：" + getFormatDescription(), "invalid");
+            playFeedback('error');
+            return;
+        }
+
         if (savedData.some(item => item.barcode === code)) {
-            showStatus("⚠️ 重複掃描: " + code, "duplicate");
+            showStatus("⚠️ 重複掃描：" + code, "duplicate");
             playFeedback('duplicate');
             return;
         }
 
-        // 3. 成功儲存
-        const newEntry = { barcode: code, time: new Date().toLocaleString() };
+        const newEntry = {
+            barcode: code,
+            time: new Date().toLocaleString()
+        };
+
         savedData.unshift(newEntry);
         localStorage.setItem('lib_barcodes', JSON.stringify(savedData));
-        
-        showStatus("✅ 掃描成功: " + code, "valid");
+
+        showStatus("✅ 掃描成功：" + code, "valid");
         playFeedback('success');
         renderLog();
     }
 
+    function getCurrentRegex() {
+        try {
+            if (barcodeSettings.mode === 'simple') {
+                const letterCount = Number(barcodeSettings.letterCount);
+                const digitCount = Number(barcodeSettings.digitCount);
+
+                if (letterCount < 0 || digitCount < 0) return null;
+                if (letterCount === 0 && digitCount === 0) return null;
+
+                let pattern = '^';
+
+                if (letterCount > 0) {
+                    pattern += `[A-Z]{${letterCount}}`;
+                }
+
+                if (digitCount > 0) {
+                    pattern += `\\d{${digitCount}}`;
+                }
+
+                pattern += '$';
+
+                return new RegExp(pattern);
+            }
+
+            return new RegExp(barcodeSettings.customRegex);
+        } catch (err) {
+            console.warn("Regex 設定錯誤：", err);
+            return null;
+        }
+    }
+
+    function getFormatDescription() {
+        if (barcodeSettings.mode === 'simple') {
+            const letterCount = Number(barcodeSettings.letterCount);
+            const digitCount = Number(barcodeSettings.digitCount);
+
+            let parts = [];
+
+            if (letterCount > 0) parts.push(`${letterCount} 個英文字母`);
+            if (digitCount > 0) parts.push(`${digitCount} 個數字`);
+
+            return parts.join(' + ');
+        }
+
+        return barcodeSettings.customRegex;
+    }
+
+    function getSimpleExample() {
+        const letterCount = Number(barcodeSettings.letterCount);
+        const digitCount = Number(barcodeSettings.digitCount);
+
+        const letters = 'A'.repeat(letterCount);
+        const digits = '1'.repeat(digitCount);
+
+        return letters + digits;
+    }
+
+    function updateFormatDisplay() {
+        if (barcodeSettings.mode === 'simple') {
+            formatDisplay.innerText = `${getFormatDescription()}，例如 ${getSimpleExample()}`;
+        } else {
+            formatDisplay.innerText = `自訂 Regex：${barcodeSettings.customRegex}`;
+        }
+    }
+
+    function updateFeedbackDisplay() {
+        const modeLabel = getFeedbackModeLabel(feedbackMode);
+
+        if (feedbackMode === 'auto') {
+            const actualMode = shouldUseVoice() ? '目前可用語音' : '目前使用嗶聲';
+            feedbackDisplay.innerText = `${modeLabel}，${actualMode}`;
+        } else {
+            feedbackDisplay.innerText = modeLabel;
+        }
+    }
+
+    function toggleSettings() {
+        settingsPanel.style.display =
+            settingsPanel.style.display === 'none' || settingsPanel.style.display === ''
+                ? 'block'
+                : 'none';
+
+        input.focus();
+    }
+
+    function onFormatModeChange() {
+        if (formatModeEl.value === 'simple') {
+            simpleSettingsEl.style.display = 'block';
+            regexSettingsEl.style.display = 'none';
+        } else {
+            simpleSettingsEl.style.display = 'none';
+            regexSettingsEl.style.display = 'block';
+        }
+    }
+
+    function saveAllSettings() {
+        const mode = formatModeEl.value;
+        const newFeedbackMode = feedbackModeEl.value;
+
+        if (mode === 'simple') {
+            const letterCount = Number(letterCountEl.value);
+            const digitCount = Number(digitCountEl.value);
+
+            if (!Number.isInteger(letterCount) || !Number.isInteger(digitCount)) {
+                showStatus("❌ 碼數必須是整數", "invalid");
+                playFeedback('error');
+                return;
+            }
+
+            if (letterCount < 0 || digitCount < 0 || letterCount + digitCount === 0) {
+                showStatus("❌ 格式設定不正確，至少要有一種碼數大於 0", "invalid");
+                playFeedback('error');
+                return;
+            }
+
+            barcodeSettings = {
+                mode: 'simple',
+                letterCount,
+                digitCount,
+                customRegex: customRegexEl.value.trim() || '^[A-Z]{2}\\d{7}$'
+            };
+        } else {
+            const regexText = customRegexEl.value.trim();
+
+            if (!regexText) {
+                showStatus("❌ Regex 不可空白", "invalid");
+                playFeedback('error');
+                return;
+            }
+
+            try {
+                new RegExp(regexText);
+            } catch (err) {
+                showStatus("❌ Regex 格式錯誤，請重新檢查", "invalid");
+                playFeedback('error');
+                return;
+            }
+
+            barcodeSettings = {
+                mode: 'regex',
+                letterCount: Number(letterCountEl.value),
+                digitCount: Number(digitCountEl.value),
+                customRegex: regexText
+            };
+        }
+
+        feedbackMode = newFeedbackMode;
+
+        localStorage.setItem('lib_barcode_settings', JSON.stringify(barcodeSettings));
+        localStorage.setItem('lib_feedback_mode', feedbackMode);
+
+        updateFormatDisplay();
+        updateFeedbackDisplay();
+
+        showStatus("✅ 設定已儲存", "valid");
+        playFeedback('success');
+        input.focus();
+    }
+
+    function resetAllSettings() {
+        if (!confirm("確定要恢復預設設定嗎？\n\n預設條碼格式：AB1234567\n提示方式：自動判斷")) {
+            input.focus();
+            return;
+        }
+
+        barcodeSettings = {
+            mode: 'simple',
+            letterCount: 2,
+            digitCount: 7,
+            customRegex: '^[A-Z]{2}\\d{7}$'
+        };
+
+        feedbackMode = 'auto';
+
+        localStorage.setItem('lib_barcode_settings', JSON.stringify(barcodeSettings));
+        localStorage.setItem('lib_feedback_mode', feedbackMode);
+
+        loadAllSettings();
+        showStatus("已恢復預設設定", "");
+        input.focus();
+    }
+
+    function loadAllSettings() {
+        formatModeEl.value = barcodeSettings.mode;
+        letterCountEl.value = barcodeSettings.letterCount;
+        digitCountEl.value = barcodeSettings.digitCount;
+        customRegexEl.value = barcodeSettings.customRegex;
+        feedbackModeEl.value = feedbackMode;
+
+        onFormatModeChange();
+        updateFormatDisplay();
+        updateFeedbackDisplay();
+    }
+
+    function getFeedbackModeLabel(mode) {
+        if (mode === 'auto') return '自動判斷';
+        if (mode === 'beep') return '只用嗶聲';
+        if (mode === 'voice') return '優先語音';
+        return '自動判斷';
+    }
+
+    function getBrowserInfo() {
+        const ua = navigator.userAgent || '';
+        const platform = navigator.platform || '';
+
+        return {
+            isFirefox: ua.includes('Firefox'),
+            isLinux: platform.toLowerCase().includes('linux') || ua.toLowerCase().includes('linux')
+        };
+    }
+
+    function isLinuxFirefox() {
+        const info = getBrowserInfo();
+        return info.isLinux && info.isFirefox;
+    }
+
+    function hasSpeechApi() {
+        return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+    }
+
+    function getAvailableVoices() {
+        if (!hasSpeechApi()) return [];
+        return window.speechSynthesis.getVoices() || [];
+    }
+
+    function hasUsableVoice() {
+        const voices = getAvailableVoices();
+        return voices.length > 0;
+    }
+
+    function hasUsableChineseVoice() {
+        const voices = getAvailableVoices();
+
+        if (voices.length === 0) {
+            return false;
+        }
+
+        return voices.some(v =>
+            v.lang === 'zh-TW' ||
+            v.lang === 'zh-Hant' ||
+            v.lang === 'zh-HK' ||
+            v.lang === 'zh-CN' ||
+            v.lang.startsWith('zh')
+        );
+    }
+
+    function shouldUseVoice() {
+        if (feedbackMode === 'beep') {
+            return false;
+        }
+
+        if (feedbackMode === 'voice') {
+            return hasUsableVoice();
+        }
+
+        // auto 模式：
+        // Ubuntu / Linux + Firefox 預設避開語音，
+        // 除非真的偵測到中文語音。
+        if (isLinuxFirefox()) {
+            return hasUsableChineseVoice();
+        }
+
+        // 其他環境：有可用 voice 才啟用語音。
+        return hasUsableVoice();
+    }
+
     function playFeedback(type) {
-        const synth = window.speechSynthesis;
-        
+        const useVoice = shouldUseVoice();
+
         if (type === 'success') {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            playBeep(880, 0.08);
+            return;
+        }
+
+        if (type === 'duplicate') {
+            if (navigator.vibrate) {
+                navigator.vibrate([300, 100, 300]);
+            }
+
+            playBeep(330, 0.12);
+            setTimeout(() => playBeep(330, 0.12), 180);
+
+            if (useVoice) {
+                speakIfAvailable("重複掃描");
+            }
+
+            return;
+        }
+
+        if (type === 'error') {
+            if (navigator.vibrate) {
+                navigator.vibrate(200);
+            }
+
+            playBeep(220, 0.18);
+
+            if (useVoice) {
+                speakIfAvailable("格式錯誤");
+            }
+
+            return;
+        }
+    }
+
+    function playBeep(frequency = 880, duration = 0.1) {
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+            if (!AudioContextClass) {
+                return;
+            }
+
+            const audioCtx = new AudioContextClass();
             const osc = audioCtx.createOscillator();
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            osc.connect(audioCtx.destination);
+            const gain = audioCtx.createGain();
+
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
-        } else if (type === 'duplicate') {
-            if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
-            const utterance = new SpeechSynthesisUtterance("重複掃描");
+            osc.stop(audioCtx.currentTime + duration);
+
+            osc.onended = () => {
+                audioCtx.close();
+            };
+        } catch (err) {
+            console.warn("音效播放失敗：", err);
+        }
+    }
+
+    function speakIfAvailable(text) {
+        try {
+            if (!hasSpeechApi()) {
+                return;
+            }
+
+            const voices = getAvailableVoices();
+
+            if (!voices || voices.length === 0) {
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-TW';
-            synth.speak(utterance);
-        } else if (type === 'error') {
-            if (navigator.vibrate) navigator.vibrate(200);
-            const utterance = new SpeechSynthesisUtterance("格式錯誤");
-            utterance.lang = 'zh-TW';
-            synth.speak(utterance);
+            utterance.rate = 1;
+            utterance.pitch = 1;
+
+            const zhVoice = voices.find(v =>
+                v.lang === 'zh-TW' ||
+                v.lang === 'zh-Hant' ||
+                v.lang === 'zh-HK' ||
+                v.lang === 'zh-CN' ||
+                v.lang.startsWith('zh')
+            );
+
+            if (zhVoice) {
+                utterance.voice = zhVoice;
+            }
+
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        } catch (err) {
+            console.warn("語音播放失敗：", err);
         }
     }
 
     function renderLog() {
         countEl.innerText = savedData.length;
+
+        if (savedData.length === 0) {
+            logContainer.innerHTML = `
+                <div style="text-align:center; color:#999; padding:20px;">
+                    尚無掃描紀錄
+                </div>
+            `;
+            return;
+        }
+
         logContainer.innerHTML = savedData.map(item => `
             <div class="log-item">
-                <span>${item.barcode}</span>
-                <span style="color: #999; font-size: 0.8em;">${item.time}</span>
+                <span>${escapeHtml(item.barcode)}</span>
+                <span style="color: #999; font-size: 0.8em;">${escapeHtml(item.time)}</span>
             </div>
         `).join('');
     }
@@ -130,13 +795,28 @@
     }
 
     function exportCSV() {
-        if (savedData.length === 0) return;
-        let csvContent = "\uFEFF條碼,時間\n" + savedData.map(e => `${e.barcode},${e.time}`).join("\n");
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        if (savedData.length === 0) {
+            showStatus("目前沒有資料可下載", "invalid");
+            playFeedback('error');
+            input.focus();
+            return;
+        }
+
+        const csvContent = "\uFEFF條碼,時間\n" + savedData
+            .map(e => `${csvEscape(e.barcode)},${csvEscape(e.time)}`)
+            .join("\n");
+
+        const blob = new Blob([csvContent], {
+            type: 'text/csv;charset=utf-8;'
+        });
+
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = `library_export_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
+
+        URL.revokeObjectURL(link.href);
+        input.focus();
     }
 
     function clearData() {
@@ -146,6 +826,27 @@
             renderLog();
             showStatus("已清空", "");
         }
+
+        input.focus();
+    }
+
+    function csvEscape(value) {
+        const text = String(value ?? '');
+
+        if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+            return `"${text.replace(/"/g, '""')}"`;
+        }
+
+        return text;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
     }
 </script>
 </body>
